@@ -1,4 +1,6 @@
 const { NlpManager } = require('node-nlp');
+const express = require('express')
+const app = express()
 
 const manager = new NlpManager({ languages: ['en'], forceNER: true });
 // Adds the utterances and intents for the NLP
@@ -21,6 +23,10 @@ manager.addAnswer('en', 'greetings.hello', 'Greetings!');
 (async() => {
     await manager.train();
     manager.save();
-    const response = await manager.process('en', 'I should go now');
-    console.log(response);
+    app.get('/bot',async (req, res)=>{
+        const response = await manager.process('en', req.query.message);
+        res.send(response.answer || "Please rephrase")
+    })
+    app.listen(3000)   
+   
 })();
