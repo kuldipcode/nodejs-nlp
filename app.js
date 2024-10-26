@@ -20,9 +20,9 @@ manager.addAnswer('en', 'greetings.bye', 'see you soon!');
 manager.addAnswer('en', 'greetings.hello', 'Hey there!');
 manager.addAnswer('en', 'greetings.hello', 'Greetings!');
 
-async function sendTextMessage(){
+async function sendTextMessage(aiRes){
     const response = await axios({
-        url:"api setup",
+        url:'https://graph.facebook.com/v20.0/436001352936040/messages',
         method:'post',
         headers:{
             'Authorization': `Bearer ${process.env.WHATSAPP_TOKEN}`,
@@ -30,29 +30,32 @@ async function sendTextMessage(){
         },
         data:JSON.stringify({
             messaging_product: 'whatsapp',
-            to:'9979193449',
+            to:'919979193449',
             type:'text',
             text:{
                 // name:'Hello_world',
                 // language:{
                 //     code: 'en_US'
                 // }
-                body:'nlp data'
+                body:`${aiRes}`
             }
         })
     });
+    console.log(response.data)
 }
 
-console.log(response.data)
+
 // Train and save the model.
 app.get('/bot',async (req, res)=>{
     const response = await manager.process('en', req.query.message);
+    const whatsapp_res = await sendTextMessage(response);
     res.send(response.answer || "Please rephrase")
 })
+
+
 (async() => {
     await manager.train();
-    manager.save();
-    sendTextMessage()
+    manager.save();    
     app.listen(3000)   
    
 })();
