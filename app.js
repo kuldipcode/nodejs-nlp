@@ -1,7 +1,8 @@
+require('dotenv').config();
+const axios = require('axios');
 const { NlpManager } = require('node-nlp');
 const express = require('express')
 const app = express()
-
 const manager = new NlpManager({ languages: ['en'], forceNER: true });
 // Adds the utterances and intents for the NLP
 manager.addDocument('en', 'goodbye for now', 'greetings.bye');
@@ -19,14 +20,39 @@ manager.addAnswer('en', 'greetings.bye', 'see you soon!');
 manager.addAnswer('en', 'greetings.hello', 'Hey there!');
 manager.addAnswer('en', 'greetings.hello', 'Greetings!');
 
+async function sendTextMessage(){
+    const response = await axios({
+        url:"api setup",
+        method:'post',
+        headers:{
+            'Authorization': `Bearer ${process.env.WHATSAPP_TOKEN}`,
+            'Content-Type':'application/json'
+        },
+        data:JSON.stringify({
+            messaging_product: 'whatsapp',
+            to:'9979193449',
+            type:'text',
+            text:{
+                // name:'Hello_world',
+                // language:{
+                //     code: 'en_US'
+                // }
+                body:'nlp data'
+            }
+        })
+    });
+}
+
+console.log(response.data)
 // Train and save the model.
+app.get('/bot',async (req, res)=>{
+    const response = await manager.process('en', req.query.message);
+    res.send(response.answer || "Please rephrase")
+})
 (async() => {
     await manager.train();
     manager.save();
-    app.get('/bot',async (req, res)=>{
-        const response = await manager.process('en', req.query.message);
-        res.send(response.answer || "Please rephrase")
-    })
+    sendTextMessage()
     app.listen(3000)   
    
 })();
