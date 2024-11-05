@@ -1,8 +1,8 @@
 require('dotenv').config();
+const express = require('express');
+const app = express();
 const axios = require('axios');
 const { NlpManager } = require('node-nlp');
-const express = require('express')
-const app = express()
 const manager = new NlpManager({ languages: ['en'], forceNER: true });
 // Adds the utterances and intents for the NLP
 manager.addDocument('en', 'goodbye for now', 'greetings.bye');
@@ -52,10 +52,8 @@ app.get('/bot',async (req, res)=>{
     res.send(response.answer || "Please rephrase")
 })
 
-
-(async() => {
+app.listen(3000,async  () => {
     await manager.train();
-    manager.save();    
-    app.listen(3000)   
-   
-})();
+    manager.save();   
+  })
+
